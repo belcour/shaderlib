@@ -1,0 +1,17 @@
+<meta charset="UTF-8">
+<html>
+    <head>
+        <script src="../ext/jquery-3.1.1.js"></script>
+        <script data-main="../scripts/shaders.js" src="../ext/require.js"></script>
+    </head>
+    <body>
+        <br />
+        <center>
+            <canvas id="ref" class="glcanvas" width="512" height="512" viewer="shaders/defaults/viewer.shader" progressive="shaders/examples/qmc-sequence.shader" callback="setLightDirection"></canvas><br />
+            <select class="uniform" id="u_RandomSequence">
+                <option>Additive 3D</option>
+                <option>Davenport 2D</option>
+            </select>
+        </center>
+    </body>
+</html>
