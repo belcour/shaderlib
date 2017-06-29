@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+   <head>
+      <meta charset="utf-8">
+
+      <title>Title</title>
+
+      <meta name="description" content="Slides">
+      <meta name="author" content="Laurent Belcour">
+
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+      <link rel="stylesheet" href="./ext/reveal.css">
+      <link rel="stylesheet" href="./ext/black.css" id="theme">
+
+      <script src="./ext/head.min.js"></script>
+      <script src="./ext/jquery-3.1.1.js"></script>
+      <script src="./ext/three.min.js"></script>
+      <script src="./ext/reveal.js"></script>
+      <script src="../scripts/utils.js"></script>
+   </head>
+   <body>
+      <div class="reveal">
+            <div class="slides">
+                  <section><h2>Slide 1</h2>
+                        <center>
+                           <div id="Slide1" class="webgl" style="width:200px;height:200px;"></div>
+                        </center>
+                  </section>
+                  <section>Slide 2<br />
+                        <!--<svg class="fragment" id="Slide2" width="200px" height="400px"></svg>-->
+                        <center>
+                           <div id="Slide2" class="webgl" style="width:200px;height:200px;"></div>
+                        </center>
+
+                        <br />
+                        <select class="uniform" id="u_RandomSequence">
+                           <option>Additive 3D</option>
+                           <option>Davenport 2D</option>
+                        </select>
+
+                        <div  class="fragment"></div>
+                        <script>
+                              // var snap = Snap('#Slide2');
+                              // snap.circle(100, 100, 100);
+
+                              Reveal.addEventListener('slidechanged', function( event ) {
+                                 var element = $(event.currentSlide).find("div.webgl");
+                                 replaceElement(element[0].id, Reveal.getScale());
+                              });
+                        </script>
+                  </section>
+            </div>
+      </div>
+      <script>
+            Reveal.initialize({
+                  dependencies: [
+                        // { src: './ext/reveal.js/plugin/notes/notes.js', async: true },
+                        // { src: './ext/reveal.js/plugin/math/math.js', async: true }
+	         ]});
+
+            createCanvas();
+            replaceElement("Slide1", Reveal.getScale());
+
+            var scene  = new THREE.Scene();
+            var camera = new THREE.PerspectiveCamera( 75, 1.0, 0.1, 1000 );
+
+            var canvas = $('#_webglViewport')[0];
+            var renderer = new THREE.WebGLRenderer({canvas : canvas});
+            //renderer.setSize( window.innerWidth, window.innerHeight );
+            //document.body.appendChild( renderer.domElement );
+
+            var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+            var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+            var cube = new THREE.Mesh( geometry, material );
+            scene.add( cube );
+
+            camera.position.z = 5;
+            renderer.render( scene, camera );
+      </script>
+   </body>
+</html>
