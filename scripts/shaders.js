@@ -1,30 +1,34 @@
-requirejs.config({
-    baseUrl: '../scripts',
-    paths: {
-        shaders: '../shaders'
-    }
-});
+var _baseUrl = '../';
 
 /* Global dictionary containing the include files buffers
  * We asynchronously load the file included in the main fragment and vertex
  * shaders and store them inside this dictionnary to finally replace the
  * strings into the shaders.
  */
-var _mainTimeOut = 300;
+var _mainTimeOut  = 300;
 var _pendingLoads = new Set();
-var _inlineDict = {};
-var _inlineRegEx = /^#include [\"\<](.+)[\"\>]/mg;
+var _everyLoads   = new Set();
+var _inlineDict   = new Map();
+var _inlineRegEx  = /^#include [\"\<](.+)[\"\>]/mg;
 
 /* Load the content of a file using Require.JS.
  * This function should be used inside RegEx calls such as 'replace'
  */
 function loadTextFileFromMatch(match, filename) {
-    //var result = '\n// Not included "' + filename + '"';
-    _pendingLoads.add(match);
-    require(['text!' + filename], function(file) {
-        _inlineDict[match] = file;
-        _pendingLoads.delete(match);
-    });
+   // Do not attempt to load an already queried filename
+   if(_everyLoads.has(match)) {
+      return;
+   }
+
+   // Append the current filename to the list of queried
+   // files. Async resolve will remove this file from the
+   // list.
+   _pendingLoads.add(match);
+   _everyLoads.add(match);
+   jQuery.get(_baseUrl + filename, function(file) {
+      _inlineDict[match] = file;
+      _pendingLoads.delete(match);
+   });
 }
 
 /* Search for every included file in a buffer and append its content
@@ -60,72 +64,89 @@ function processIncludes(buffer) {
  * and binded for the viewing fragment shader 'frag_src'.
  */
 function requireProgressiveWebGL(canvas, vert_src, frag_src, prog_src) {
-    // Use the function defined in webgl to load the fragment and vertex shaders
-    require(['text!' + vert_src, 'text!' + frag_src, 'text!' + prog_src],
-        function(vertex, fragment, prog) {
-            // Check if file loads
-            if(vertex == undefined || fragment == undefined  || prog == undefined) {
-                alert('Could not find one of the shaders');
+
+   // Temporary list of currently loading files. One all the files are loaded
+   // with the proper includes, process them and init the webGL context.
+   var _set = new Set();
+   _set.add(vert_src);
+   _set.add(frag_src);
+   _set.add(prog_src);
+
+   var vertDeferred = jQuery.get(_baseUrl + vert_src);
+   var fragDeferred = jQuery.get(_baseUrl + frag_src);
+   var progDeferred = jQuery.get(_baseUrl + prog_src);
+
+   // Resolve the async text files query together
+   $.when(vertDeferred, fragDeferred, progDeferred)
+      .done(function(vert, frag, prog) {
+
+         var vertex   = vert[0];
+         var fragment = frag[0];
+         var progress = prog[0];
+
+         // Fill the global dictionnary with all includes
+         searchIncludes(vertex);
+         searchIncludes(fragment);
+         searchIncludes(progress);
+
+         // Load the WebGL code and create the context, geometry and shaders
+         setTimeout(function() {
+            if(_pendingLoads.size > 0) {
+               alert('Missing GLSL header files!');
+               return;
             }
 
-            // Fill the global dictionnary with all includes
-            searchIncludes(vertex);
-            searchIncludes(fragment);
-            searchIncludes(prog);
-
-            // Load the WebGL code and create the context, geometry and shaders
-            setTimeout(function() {            
-                require(['webgl'],
-                    function(webgl) {
-                        if(_pendingLoads.size > 0) { 
-                            alert('Missing GLSL header files!');
-                            return;                        
-                        }
-
-                        vertex   = processIncludes(vertex);
-                        fragment = processIncludes(fragment);
-                        prog = processIncludes(prog);
-                        initWebGLProgressive(canvas, vertex, prog, fragment);
-                    }
-                );
-            }, _mainTimeOut);            
-        }
-    );
+            vertex   = processIncludes(vertex);
+            fragment = processIncludes(fragment);
+            progress = processIncludes(progress);
+            initWebGLProgressive(canvas, vertex, progress, fragment);
+         }, _mainTimeOut);
+      })
+      .fail(function() {
+         alert('Unable to load vertex and fragment shaders');
+      });
 }
 
-/* Create a single draw pass that consist of a vertex shader and a fragment 
+/* Create a single draw pass that consist of a vertex shader and a fragment
  * shader.
  */
 function requireClassicalWebGL(canvas, vert_src, frag_src) {
-    // Use the function defined in webgl to load the fragment and vertex shaders
-    require(['text!' + vert_src, 'text!' + frag_src],
-        function(vertex, fragment) {
-            // Check if file loads
-            if(vertex == undefined || fragment == undefined) {
-                alert('Could not find one of the shaders');
+
+   // Temporary list of currently loading files. One all the files are loaded
+   // with the proper includes, process them and init the webGL context.
+   var _set = new Set();
+   _set.add(vert_src);
+   _set.add(frag_src);
+
+   var vertDeferred = jQuery.get(_baseUrl + vert_src);
+   var fragDeferred = jQuery.get(_baseUrl + frag_src);
+
+   // Resolve the async text files query together
+   $.when(vertDeferred, fragDeferred)
+      .done(function(vert, frag) {
+
+         var vertex   = vert[0];
+         var fragment = frag[0];
+
+         // Fill the global dictionnary with all includes
+         searchIncludes(vertex);
+         searchIncludes(fragment);
+
+         // Load the WebGL code and create the context, geometry and shaders
+         setTimeout(function() {
+            if(_pendingLoads.size > 0) {
+               alert('Missing GLSL header files!');
+               return;
             }
 
-            // Fill the global dictionnary with all includes
-            searchIncludes(vertex);
-            searchIncludes(fragment);
-
-            // Load the WebGL code and create the context, geometry and shaders
-            setTimeout(function() {
-                require(['webgl'],
-                    function(webgl) {
-                        if(_pendingLoads.size > 0) { 
-                            alert('Missing GLSL header files!');
-                            return;
-                        }
-
-                        vertex   = processIncludes(vertex);
-                        fragment = processIncludes(fragment);
-                        initWebGL(canvas, vertex, fragment);
-                    }
-                );
-            }, _mainTimeOut);
-        }
-    );
+            vertex   = processIncludes(vertex);
+            fragment = processIncludes(fragment);
+            initWebGL(canvas, vertex, fragment);
+         }, _mainTimeOut);
+      })
+      .fail(function() {
+         alert('Unable to load vertex and fragment shaders');
+      });
 }
 
 function createOpenGLCanvas(canvas) {
@@ -149,23 +170,30 @@ function createOpenGLCanvas(canvas) {
     }
 }
 
-/* Load the shaders using Require.JS.
- * {TODO: Add multiple webgl context in a page}
+/* Load the shaders for every `.glcanvas` element in the DOM
  */
 $(document).ready(function() {
 
-    // Load Require.JS plugin to handle text files
-    require(['text'], function(text) {
-        // Obtain the shader source files
-        var query = $('.glcanvas');
-        for(var k=0; k<query.length; ++k) {
+   // Load the associated javascript files `webgl.js` and `utils.js`
+   // here. And create OpenGL canvas for every .glcanvas element in
+   // the DOM.
+   //
+   // {TODO: Maybe we should compress them into a single JS file}
+   jQuery.getScript(_baseUrl + 'scripts/webgl.js')
+      .done(function() {
+         // Obtain the shader source files
+         var query = $('.glcanvas');
+         for(var k=0; k<query.length; ++k) {
             var canvas  = query[k];
             if(canvas == null) {
-                alert('Unable to load canvas: ' + canvas);
-                continue;
+               alert('Unable to load canvas: ' + canvas);
+               continue;
             }
 
             createOpenGLCanvas(canvas);
-        }
-    });
+         }
+      })
+      .fail(function() {
+         alert('ERROR: Unable to load webgl.js, check the baseURL');
+      });
 });
