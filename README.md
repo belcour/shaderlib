@@ -9,6 +9,10 @@ we provide them in `./tests/ext/`.
 
 We advise to set the dependencies using submodules such as:
 
-   `git submodule add https://github.com/jquery/jquery.git`
-   `cd jquery`
-   `git checkout f71eeda0fac4ec1442e631e90ff0703a0fb4ac96`
+
+```
+git submodule add https://github.com/jquery/jquery.git
+cd jquery
+git checkout f71eeda0fac4ec1442e631e90ff0703a0fb4ac96
+
+```
