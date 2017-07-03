@@ -1,7 +1,3 @@
-
-
-@import url('https://fonts.googleapis.com/css?family=Comfortaa');
-@import url('https://fonts.googleapis.com/css?family=Roboto');
 @import url('https://fonts.googleapis.com/css?family=PT+Sans');
 section.has-light-background, section.has-light-background h1, section.has-light-background h2, section.has-light-background h3, section.has-light-background h4, section.has-light-background h5, section.has-light-background h6 {
   color: #222; }
@@ -10,28 +6,26 @@ section.has-light-background, section.has-light-background h1, section.has-light
  * GLOBAL STYLES
  *********************************************/
 body {
-  background: #222;
-  background-color: #222; }
+  background: #DDD;
+  background-color: #CCC; }
 
 .reveal {
-  font-family: "PT Sans", Roboto;
+  font-family: "PT Sans";
   font-size: 28px;
   font-weight: normal;
-  color: #fff; }
+  color: #000; }
 
 ::selection {
-  color: #fff;
+  color: #000;
   background: #bee4fd;
   text-shadow: none; }
 
 ::-moz-selection {
-  color: #fff;
+  color: #000;
   background: #bee4fd;
   text-shadow: none; }
 
 .reveal .slides > section.title {
-  height:auto;
-  text-align: center;
   line-height: 1.3;
   font-weight: inherit;
 }
@@ -43,7 +37,11 @@ body {
   padding: 50px;
   text-align: left;
   line-height: 1.3;
-  font-weight: inherit; }
+  font-weight: inherit;
+  background-color: #DDD;
+  box-shadow: 5px 5px 5px #888888;
+  /*border: outset 1px #000; */
+}
 
 /*********************************************
  * HEADERS
@@ -55,7 +53,7 @@ body {
 .reveal h5,
 .reveal h6 {
   margin: 0 0 20px 0;
-  color: #fff;
+  color: #000;
   /*font-family: Roboto;*/
   font-weight: 600;
   line-height: 1.2;
@@ -219,19 +217,19 @@ body {
  * LINKS
  *********************************************/
 .reveal a {
-  color: #42affa;
+  color: #424242;
   text-decoration: none;
   -webkit-transition: color .15s ease;
   -moz-transition: color .15s ease;
   transition: color .15s ease; }
 
 .reveal a:hover {
-  color: #8dcffc;
+  color: #8d8d8d;
   text-shadow: none;
   border: none; }
 
 .reveal .roll span:after {
-  color: #fff;
+  color: #000;
   background: #068de9; }
 
 /*********************************************
@@ -240,8 +238,8 @@ body {
 .reveal section img {
   margin: 15px 0px;
   background: rgba(255, 255, 255, 0.12);
-  border: 2px solid #555;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15); }
+  border: 1px solid #000;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5); }
 
 .reveal section img.plain {
   border: 0;
@@ -255,7 +253,7 @@ body {
 
 .reveal a:hover img {
   background: rgba(255, 255, 255, 0.2);
-  border-color: #42affa;
+  border-color: #424242;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.55); }
 
 /*********************************************
@@ -263,31 +261,31 @@ body {
  *********************************************/
 .reveal .controls .navigate-left,
 .reveal .controls .navigate-left.enabled {
-  border-right-color: #42affa; }
+  border-right-color: #424242; }
 
 .reveal .controls .navigate-right,
 .reveal .controls .navigate-right.enabled {
-  border-left-color: #42affa; }
+  border-left-color: #424242; }
 
 .reveal .controls .navigate-up,
 .reveal .controls .navigate-up.enabled {
-  border-bottom-color: #42affa; }
+  border-bottom-color: #424242; }
 
 .reveal .controls .navigate-down,
 .reveal .controls .navigate-down.enabled {
-  border-top-color: #42affa; }
+  border-top-color: #424242; }
 
 .reveal .controls .navigate-left.enabled:hover {
-  border-right-color: #8dcffc; }
+  border-right-color: #8d8d8d; }
 
 .reveal .controls .navigate-right.enabled:hover {
-  border-left-color: #8dcffc; }
+  border-left-color: #8d8d8d; }
 
 .reveal .controls .navigate-up.enabled:hover {
-  border-bottom-color: #8dcffc; }
+  border-bottom-color: #8d8d8d; }
 
 .reveal .controls .navigate-down.enabled:hover {
-  border-top-color: #8dcffc; }
+  border-top-color: #8d8d8d; }
 
 /*********************************************
  * PROGRESS BAR
@@ -296,7 +294,7 @@ body {
   background: rgba(0, 0, 0, 0.2); }
 
 .reveal .progress span {
-  background: #42affa;
+  background: #424242;
   -webkit-transition: width 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985);
   -moz-transition: width 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985);
   transition: width 800ms cubic-bezier(0.26, 0.86, 0.44, 0.985); }

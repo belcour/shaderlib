@@ -23,11 +23,24 @@ function createCanvas() {
 function replaceElement(name, scale=1.0) {
     var viewport = $("#_webglViewport");
     var element  = $("#" + name);
+    if(element == undefined) {
+       alert('Unable to find element ' + name);
+       return;
+    }
+
     var offset   = element.position();
+    if(offset == undefined) {
+       offset.top  = 0;
+       offset.left = 0;
+    }
+
     viewport.insertAfter(element);
     viewport[0].style["visibility"] = "visible";
     viewport[0].style["top"]  = (offset.top  / scale) + "px";
     viewport[0].style["left"] = (offset.left / scale) + "px";
-    viewport[0].style["width"]  = (element[0].style["width"]);// + "px";
-    viewport[0].style["height"] = (element[0].style["height"]);// + "px";
+
+    if(element[0].style["width"] != undefined)
+       viewport[0].style["width"]  = (element[0].style["width"]);// + "px";
+    if(element[0].style["height"] != undefined)
+      viewport[0].style["height"] = (element[0].style["height"]);// + "px";
 }
