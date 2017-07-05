@@ -7,7 +7,7 @@ section.has-light-background, section.has-light-background h1, section.has-light
  *********************************************/
 body {
   background: #DDD;
-  background-color: #CCC; }
+  background-color: #DDD; }
 
 .reveal {
   font-family: "PT Sans";
@@ -39,7 +39,7 @@ body {
   line-height: 1.3;
   font-weight: inherit;
   background-color: #DDD;
-  box-shadow: 5px 5px 5px #888888;
+  box-shadow: 0px 0px 10px #888888;
   /*border: outset 1px #000; */
 }
 
@@ -109,10 +109,17 @@ body {
   list-style-type: decimal; }
 
 .reveal ul {
-  list-style-type: disc; }
+  list-style-type: square; }
+
+.reveal ul li {
+  margin-top: 1em; }
 
 .reveal ul ul {
-  list-style-type: square; }
+  font-size: 0.8em;
+  list-style-type: disc; }
+
+.reveal ul ul li {
+  margin-top: 0.3em; }
 
 .reveal ul ul ul {
   list-style-type: circle; }
@@ -206,8 +213,8 @@ body {
 
 .reveal small {
   display: inline-block;
-  font-size: 0.6em;
-  line-height: 1.2em;
+  font-size: 0.8em;
+  line-height: 1.0em;
   vertical-align: top; }
 
 .reveal small * {
@@ -255,6 +262,15 @@ body {
   background: rgba(255, 255, 255, 0.2);
   border-color: #424242;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.55); }
+
+/*********************************************
+ * VIDEOS
+ *********************************************/
+.reveal section video {
+  margin: 15px 0px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid #000;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5); }
 
 /*********************************************
  * NAVIGATION CONTROLS
