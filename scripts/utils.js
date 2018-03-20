@@ -10,8 +10,8 @@ function createCanvas() {
     _canvas = document.createElement("canvas");
     _canvas.setAttribute("class", "glcanvas");
     _canvas.setAttribute("id", _canvasName);
-    _canvas.setAttribute("width", "512");
-    _canvas.setAttribute("height", "512");
+    _canvas.setAttribute("width", "1024");
+    _canvas.setAttribute("height", "1024");
     _canvas.setAttribute("viewer", "shaders/defaults/viewer.shader");
     _canvas.setAttribute("progressive", "shaders/examples/qmc-sequence.shader");
     _canvas.style.position = "absolute";
@@ -20,9 +20,9 @@ function createCanvas() {
     document.body.appendChild(_canvas);
 }
 
-function replaceElement(name, scale=1.0) {
+function replaceElement(element, scale=1.0) {
     var viewport = $("#_webglViewport");
-    var element  = $("#" + name);
+    // var element  = $("#" + name);
     if(element == undefined) {
        alert('Unable to find element ' + name);
        return;
