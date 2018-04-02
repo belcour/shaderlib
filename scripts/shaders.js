@@ -68,7 +68,7 @@
             var deferred = loadTextFileFromMatch(result[0], result[1]);
             deferreds.push(deferred);
         }
-        
+
         return $.when.apply(null, deferreds);
     }
 
@@ -95,10 +95,10 @@
         // Temporary list of currently loading files. One all the files are loaded
         // with the proper includes, process them and init the webGL context.
         var _set = new Set();
-    
+
         // Fill the global dictionnary with all includes
         var deferred = searchIncludes(src_txt);
-    
+
         // Load the WebGL code and create the context, geometry and shaders
         deferred.done(function() {
             out_txt = processIncludes(src_txt);
