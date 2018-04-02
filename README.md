@@ -7,8 +7,18 @@ we provide them in `./tests/ext/`.
 
    + `JQuery` at tag 3.2.1
 
-We advise to set the dependencies using submodules such as:
+## Run the tests
 
+To look at the tests and example, we advise to use the python simple web server using the following command:
+```
+$ python3 -m http.server
+```
+
+Once the web server is up, go to `127.0.0.1:4000/tests/` and browse the different tests.
+
+## Usage
+
+In you own repository, we advise to set the dependencies using submodules such as:
 
 ```
 git submodule add https://github.com/jquery/jquery.git
