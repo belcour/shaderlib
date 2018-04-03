@@ -1,0 +1,117 @@
+<meta charset="UTF-8">
+<!--
+    This example illustrate how to use the Shaders library with THREE.js
+    Here, we asynchronously load a fragment shader, resolve the include
+    directive and show a sphere with SH coefficients.
+-->
+<html>
+    <head>
+        <script src="/tests/ext/jquery-3.1.1.js"></script>
+        <script src="/tests/ext/three.min.js"></script>
+        <script src="/scripts/shaders.js"></script>
+    </head>
+    <body>
+        <br />
+        <center>
+            <canvas width="512" height="512" id="three"></canvas>
+        </center>
+        <script type="x-shader/x-vertex" id="vertexshader">
+            varying vec3 vNormal;
+            void main() {
+                vNormal = normal;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+            }
+        </script>
+        <script type="x-shader/x-fragment" id="fragmentshader">
+            #line 1
+            precision highp float;
+
+            #include "shaders/library/common.shader"
+            #include "shaders/library/sh.shader"
+
+            uniform int SH_l;
+            uniform int SH_m;
+
+            varying vec3 vNormal;
+            varying vec2 vUv;
+
+            vec4 colormap(float x) {
+                float g = clamp(x, 0.0, 1.0);
+                return vec4(0.7+0.3*g, g, 0.0, 1.0);
+            }
+
+            void main() {
+                float clm[100];
+
+                SH_Fast(vNormal, 9, clm);
+                float v = clm[98];
+
+                gl_FragColor = colormap(0.5*(1.0+v));
+            }
+        </script>
+        <script>
+            // Initialize the `Shaders` library. We need to specify where is the
+            // library director.
+            Shaders.init('/');
+
+            // We need to load the fragment shader and resolve the includes. This
+            // is done using the `generateShaderFromTxt` command.
+            var in_txt = document.getElementById( 'fragmentshader' ).textContent;
+            Shaders.generateShaderFromTxt(in_txt, function(shader_txt) {
+
+                // Create a THREE.js renderer in canvas 'three'.
+                // Use the canvas resolution width x height to initiate the context.
+                var canvas = $("#three");
+                if(canvas.size < 1) {
+                    alert("No Viewport found");
+                }
+                var renderer = new THREE.WebGLRenderer({ canvas: canvas[0], alpha: true,  antialias: true });
+                renderer.domElement.width  = canvas[0].width;
+                renderer.domElement.height = canvas[0].height;
+                renderer.setSize(canvas[0].width, canvas[0].height);
+
+                // Create a new scene
+                var scene = new THREE.Scene();
+
+                // Add the sphere and apply the vertex shader and the fragmenent
+                // shader defined in the HTML document.
+                var geometry = new THREE.SphereGeometry(3, 50, 50, 0.0, 2*Math.PI, 0, 1.0*Math.PI);
+                var uniforms = {
+                    SH_l: { value: 2 },
+                    SH_m: { value: 0 }
+                };
+                var material = new THREE.ShaderMaterial( {
+                    uniforms: uniforms,
+                    vertexShader: document.getElementById( 'vertexshader' ).textContent,
+                    fragmentShader: shader_txt
+                });
+                var sphere = new THREE.Mesh(geometry, material);
+                geometry.rotateX(0.5*Math.PI);
+                scene.add(sphere);
+
+                // Update the camera position
+                var camera = new THREE.PerspectiveCamera(50, 1.0, 0.1, 1000);
+                camera.position.x = 7;
+                camera.position.y = 7;
+                camera.position.z = 7;
+                camera.up = new THREE.Vector3(0,0,1);
+                camera.lookAt(new THREE.Vector3(0,0,0));
+                camera.matrixWorldNeedsUpdate = false;
+
+                // Renderloop: make the sphere rotate
+                var render = function () {
+                        var rotation = new THREE.Matrix4();
+                        rotation.makeRotationAxis(new THREE.Vector3(0,0,1), 0.005);
+                        rotation.multiply(scene.matrixWorld);
+                        scene.rotation.setFromRotationMatrix(rotation);
+
+                        renderer.render(scene, camera);
+
+                        requestAnimationFrame(render);
+                };
+
+                render();
+            });
+        </script>
+    </body>
+</html>
