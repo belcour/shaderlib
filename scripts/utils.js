@@ -44,3 +44,24 @@ function replaceElement(element, scale=1.0) {
     if(element[0].style["height"] != undefined)
       viewport[0].style["height"] = (element[0].style["height"]);// + "px";
 }
+
+function ProjectiveSpace(snap, NB_ELEMS = 6, COLOR = "#AAF", SIZE = 256, POS_X=SIZE, POS_Y=SIZE, FONTSIZE='0.4em') {
+    var g = snap.g();
+    var dtheta = 0.5*Math.PI/NB_ELEMS;
+    for(theta=dtheta; theta<0.5*Math.PI-dtheta; theta+=dtheta) {
+        var degree = 180.0 * theta / Math.PI;
+
+        var radius = SIZE * Math.sin(theta);
+        var c = snap.circle(POS_X, POS_Y, radius).attr({fillOpacity: 0, stroke: COLOR, strokeWidth: 2, opacity: 0.2});
+        var t = snap.text(POS_X/*-18*/, POS_Y-radius+8, Math.round(degree) + '°').attr({fill: COLOR, fontSize: FONTSIZE, textAnchor: 'middle'});
+        g.add(c);
+        g.add(t);
+
+        for(phi=theta; phi<theta+dtheta; phi+= dtheta/3) {
+            var radius = SIZE * Math.sin(phi);
+            var c = snap.circle(POS_X, POS_Y, radius).attr({fillOpacity: 0, stroke: COLOR, strokeWidth: 1, opacity: 0.1});
+            g.add(c);
+        }
+    }
+    return g;
+}

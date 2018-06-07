@@ -40,8 +40,10 @@
     */
     function loadTextFileFromMatch (match, filename) {
         // Do not attempt to load an already queried filename
-        if(_everyLoads.has(match)) {
-            return;
+        if(_inlineDict.has(match) || _pendingLoads.has(match)) {
+            var def = $.Deferred();
+            setTimeout(function(){ def.resolve(); }, 1000);
+            return def;
         }
 
         // Append the current filename to the list of queried
@@ -79,9 +81,14 @@
    function processIncludes (buffer) {
         var re = _inlineRegEx;
         var result;
+        var fill;
         while((result = re.exec(buffer)) != null) {
             prefix = '\n#line 1\n';
-            buffer = buffer.replace(result[0], prefix+_inlineDict[result[0]]);
+            fill   = _inlineDict[result[0]];
+            if(fill == undefined) {
+                alert('Aie');
+            }
+            buffer = buffer.replace(result[0], prefix+fill);
         }
         return buffer;
     }
@@ -91,10 +98,6 @@
      * all the includes inlined, it is passed to function `func`.
      */
     function generateShaderFromTxt (src_txt, func) {
-
-        // Temporary list of currently loading files. One all the files are loaded
-        // with the proper includes, process them and init the webGL context.
-        var _set = new Set();
 
         // Fill the global dictionnary with all includes
         var deferred = searchIncludes(src_txt);
@@ -110,6 +113,53 @@
             });
         });
     }
+
+    /* Include shader headers in `src_txt` using library in the search
+     * path. This method is asynchronous. Once the shader is parsed and
+     * all the includes inlined, it is passed to function `func`.
+     */
+    function generateShaderFromFiles (files, func, baseUrl=_baseUrl) {
+
+        if(typeof(files) == 'string') {
+            files = [files];
+        }
+
+        var txts  = [];
+        var defs  = [];
+        var defsSearch = [];
+        for(var i=0; i<files.length; ++i) {
+            var file = files[i];
+            var def  = jQuery.get(file, function(src_txt) {
+                txts.push(src_txt);
+                defsSearch.push(searchIncludes(src_txt));
+            });
+
+            defs.push(def);
+        }
+
+        $.when.apply($, defs).done(function() {
+            $.when.apply($, defsSearch).done(function() {
+                for(var k=0; k<txts.length; ++k) {
+                    var txt = processIncludes(txts[k]);
+                    txts[k] = txt;
+                }
+
+                func(txts);
+            });
+        });
+    }
+    /* Include shader headers in `src_txt` using library in the search
+     * path. This method is asynchronous. Once the shader is parsed and
+     * all the includes inlined, it is passed to function `func`.
+     */
+    function generateShaderFromFile (file, func, baseUrl=_baseUrl) {
+        generateShaderFromFiles([file], function(shaders) {
+            var shader = shaders[0];
+            func(shader);
+        }, baseUrl);
+    }
+    
+
 
     // /* Use Require.JS to load a progressive renderer that uses the same vertex
     // * shader but does two passes of different fragment shaders. The result
@@ -255,7 +305,9 @@
      */
     _Shaders = {
         init : init,
-        generateShaderFromTxt: generateShaderFromTxt
+        generateShaderFromTxt   : generateShaderFromTxt,
+        generateShaderFromFile  : generateShaderFromFile,
+        generateShaderFromFiles : generateShaderFromFiles
     };
 
     return _Shaders;
