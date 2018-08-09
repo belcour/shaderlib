@@ -161,17 +161,20 @@ body {
   font-family: monospace;
   line-height: 1.2em;
   word-wrap: break-word;
-  box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.3); }
+  /*box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.3); */}
 
 .reveal code {
-  font-family: monospace; }
+font-family: monospace; }
 
 .reveal pre code {
-  display: block;
-  padding: 5px;
-  overflow: auto;
-  max-height: 400px;
-  word-wrap: normal; }
+display: block;
+padding-left: 2em;
+overflow: auto;
+max-height: 400px;
+word-wrap: normal;
+border-radius: 10px;
+color: #aaa;
+background-color: #333; }
 
 .reveal table {
   margin: auto;
