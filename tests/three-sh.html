@@ -33,7 +33,6 @@
             uniform int SH_m;
 
             varying vec3 vNormal;
-            varying vec2 vUv;
 
             vec4 colormap(float x) {
                 float g = clamp(x, 0.0, 1.0);
@@ -41,7 +40,7 @@
             }
 
             void main() {
-                float clm[100];
+                float clm[225];
 
                 SH_Fast(vNormal, 9, clm);
                 float v = clm[98];
@@ -52,7 +51,7 @@
         <script>
             // Initialize the `Shaders` library. We need to specify where is the
             // library director.
-            Shaders.init('/');
+            // Shaders.init('/');
 
             // We need to load the fragment shader and resolve the includes. This
             // is done using the `generateShaderFromTxt` command.
