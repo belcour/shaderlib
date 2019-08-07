@@ -1,4 +1,5 @@
-#line 1
+#version 300 es
+#line 2
 precision highp float;
 
 #include "shaders/library/common.shader"
@@ -8,6 +9,12 @@ precision highp float;
 // Pass number for the progressive renderer
 uniform int u_PassNumber;
 uniform int u_RandomSequence;
+
+// Inputs
+in vec2 vPos;
+
+// Outputs
+out vec4 FragmentColor;
 
 #define NB_SAMPLES 32
 
@@ -23,18 +30,18 @@ vec3 TestColor(int index) {
  * samples and display the sequence.
  */
 void main(void) {
- 
+
     // Get the next 3D point in the sequence and splat it
     float nbs = float(NB_SAMPLES);
-    int   idx = mod(u_PassNumber, NB_SAMPLES);
-    
+    int   idx = imod(u_PassNumber, NB_SAMPLES);
+
     vec2 rnd;
     if(u_RandomSequence == 0) {
         rnd = QMC_Additive_3D(idx).xy;
     } else {
         rnd = QMC_Davenport(idx, NB_SAMPLES);
     }
-    
+
     vec3  R   = TestColor(idx);
 
     // Splat a Gaussian kernel and adapt width to the number of samples
@@ -43,5 +50,5 @@ void main(void) {
     // Scale the contribution to avoid black pixels
     R *= 2.0 * nbs;
 
-    gl_FragColor = vec4(R, 1.0);
+    FragmentColor = vec4(R, 1.0);
 }

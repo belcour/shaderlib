@@ -42,7 +42,7 @@ function initWebGL(canvas, vert_txt, frag_txt) {
 
     var drawCalls = function(canvas) {
         canvas.gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        drawGeometry(canvas.gl, canvas.program, canvas.geomId); 
+        drawGeometry(canvas.gl, canvas.program, canvas.geomId);
     };
 
     setInterval(drawCalls, 1, canvas);
@@ -52,7 +52,7 @@ function initWebGL(canvas, vert_txt, frag_txt) {
  *
  *   + 'vert_txt' is the vertex shader sources.
  *   + 'prog_txt' and 'view_txt' are fragment shader sources.
- * 
+ *
  */
 function initWebGLProgressive(canvas, vert_txt, prog_txt, view_txt) {
     if(!vert_txt || !prog_txt || !view_txt) {
@@ -80,7 +80,7 @@ function initWebGLProgressive(canvas, vert_txt, prog_txt, view_txt) {
     // Create framebuffers & texture
     var tex_prog = gl.createTexture();
     var dataf = new Float32Array(512*512*4);
-    
+
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, tex_prog);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, 512, 512, 0, gl.RGBA, gl.FLOAT, dataf);
@@ -93,7 +93,7 @@ function initWebGLProgressive(canvas, vert_txt, prog_txt, view_txt) {
     fb_prog.height = 512;
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex_prog, 0);
     var enut = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
-    
+
     // Add special constant uniform to the viewing program
     gl.useProgram(prg_view);
     var uniform_tex = gl.getUniformLocation(prg_view, 'u_FramebufferSampler');
@@ -132,14 +132,14 @@ function initWebGLProgressive(canvas, vert_txt, prog_txt, view_txt) {
             gl.enable(gl.BLEND);
             gl.blendFunc(gl.ONE, gl.ONE);
         }
-        
+
         // Update the pass number in the shader
         var uniform_num = gl.getUniformLocation(canvas.programs[0], 'u_PassNumber');
         gl.uniform1i(uniform_num, canvas.passId);
 
         // Progressive renderer
         canvas.gl.bindFramebuffer(gl.FRAMEBUFFER, canvas.framebuffers[0]);
-        if(canvas.passId == 1) gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);        
+        if(canvas.passId == 1) gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         drawGeometry(canvas.gl, canvas.programs[0], canvas.geomId);
 
 
@@ -170,7 +170,7 @@ function setUniformK (elem, gl, program) {
         gl.uniform1i(uniform_id, elem.selectedIndex);
     } else {
         gl.uniform1f(uniform_id, elem.value);
-    }            
+    }
 }
 
 function linkUniformToHtml(canvas, gl, program) {
@@ -301,7 +301,7 @@ function drawGeometry(gl, program, geomId) {
 }
 
 
-/* Update the light position with mouse position 
+/* Update the light position with mouse position
  */
 function getMousePositionInCanvas(canvas, event) {
     var rect = canvas.getBoundingClientRect();

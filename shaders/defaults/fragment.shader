@@ -1,12 +1,13 @@
+#version 300 es
 #line 1
 precision highp float;
 
-#include "../shaders/library/common.shader"
-#line 5
+// Inputs
+in vec2 vPos;
 
-// Pass number for the progressive renderer
-uniform int u_PassNumber;
+// Outputs
+out vec4 FragmentColor;
 
 void main(void) {
-    gl_FragColor = vec4(vPos.xy, 0.0, 1.0);
+    FragmentColor = vec4(vPos.xy, 0.0, 1.0);
 }

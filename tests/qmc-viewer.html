@@ -3,15 +3,24 @@
     <head>
         <script src="./ext/jquery-3.1.1.js"></script>
         <script src="../scripts/shaders.js"></script>
+        <script src="../scripts/webgl.js"></script>
     </head>
     <body>
         <br />
         <center>
-            <canvas id="ref" class="glcanvas" width="512" height="512" viewer="shaders/defaults/viewer.shader" progressive="shaders/examples/qmc-sequence.shader" callback="setLightDirection"></canvas><br />
+            <canvas id="webgl" width="512" height="512"></canvas>
+            <br />
             <select class="uniform" id="u_RandomSequence">
                 <option>Additive 3D</option>
                 <option>Davenport 2D</option>
             </select>
         </center>
     </body>
+    <script>
+        Shaders.init('../');
+        var files = ['../shaders/defaults/vertex.shader', '../shaders/examples/qmc-sequence.shader', '../shaders/defaults/viewer.shader']
+        Shaders.generateShaderFromFiles(files, function(shaders) {
+            initWebGLProgressive(document.getElementById('webgl'), shaders[0], shaders[1], shaders[2]);
+        });
+    </script>
 </html>

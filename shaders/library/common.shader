@@ -2,16 +2,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
-//                        Common varying variables                           //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
-
-// 2D Position in the canvas
-varying vec2 vPos;
-
-
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
 //                              Common macros                                //
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
@@ -70,7 +60,7 @@ float SphericalGaussian(vec3 x, vec3 mu, float var) {
     return exp(k * (dot(x, mu) - 1.0));
 }
 
-int mod(int n, int N) {
+int imod(int n, int N) {
     return n - N*(n / N);
 }
 
@@ -81,14 +71,14 @@ int mod(int n, int N) {
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-float sinh(float x) {
-    return 0.5 * (1.0 - exp(- 2.0 * x)) / exp(- x);
-}
+// float sinh(float x) {
+//     return 0.5 * (1.0 - exp(- 2.0 * x)) / exp(- x);
+// }
 
-float cosh(float x) {
-    return 0.5 * (1.0 + exp(- 2.0 * x)) / exp(- x);
-}
+// float cosh(float x) {
+//     return 0.5 * (1.0 + exp(- 2.0 * x)) / exp(- x);
+// }
 
-float coth(float x) {
-    return (1.0 - exp(- 2.0 * x)) / (1.0 + exp(- 2.0 * x));
-}
+// float coth(float x) {
+//     return (1.0 - exp(- 2.0 * x)) / (1.0 + exp(- 2.0 * x));
+// }

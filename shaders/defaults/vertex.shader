@@ -1,10 +1,12 @@
-#line 1
+#version 300 es
+#line 2
 precision highp float;
 
-#include "shaders/library/common.shader"
-#line 5
+// Inputs
+in vec3 aVertexPosition;
 
-attribute vec3 aVertexPosition;
+// Outputs
+out vec2 vPos;
 
 void main(void) {
     vPos = aVertexPosition.xy;
