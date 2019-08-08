@@ -54,7 +54,7 @@ void FresnelConductor(in float ct1, in float n1, in float n2, in float k,
 	R.y = (sqr(n1*ct1 - U) + sqr(V)) / (sqr(n1*ct1 + U) + sqr(V));
 	phi.y = atan( 2.0*n1 * V*ct1, sqr(U)+sqr(V)-sqr(n1*ct1) ) + PI;
 
-	R.x = ( sqr(sqr(n2)*(1.0-sqr(k))*ct1 - n1*U) + sqr(2.0*sqr(n2)*k*ct1 - n1*V) ) 
+	R.x = ( sqr(sqr(n2)*(1.0-sqr(k))*ct1 - n1*U) + sqr(2.0*sqr(n2)*k*ct1 - n1*V) )
 			/ ( sqr(sqr(n2)*(1.0-sqr(k))*ct1 + n1*U) + sqr(2.0*sqr(n2)*k*ct1 + n1*V) );
 	phi.x = atan( 2.0*n1*sqr(n2)*ct1 * (2.0*k*U - (1.0-sqr(k))*V), sqr(sqr(n2)*(1.0+sqr(k))*ct1) - sqr(n1)*(sqr(U)+sqr(V)) );
 }
@@ -93,7 +93,7 @@ vec3 FresnelSchlick(in float ct1, in vec3 F0) {
   return FresnelSchlick(ct1, F0, vec3(1.0, 1.0, 1.0));
 }
 
-/* Fresnel interaction of an incoming ray with a planar dielectric/dieletric 
+/* Fresnel interaction of an incoming ray with a planar dielectric/dieletric
  * interface of normal vector 'z'. The inputs are the cosine to the surface
  * normal 'ct1' and the two IORs. This function outputs 'ct2' the outgoing
  * cosine componnent for tranmission and the reflectance 'R12'.
@@ -123,7 +123,7 @@ void Fresnel(in  vec3 wi, in  float n1, in  float n2,
 
    float st1 = (1.0 - ct1*ct1);
    float n12 = n1/n2;
-   float st2 = sqr(n12)*st1;     
+   float st2 = sqr(n12)*st1;
    float ct2 = sqrt(1.0 - st2);
    wt.xy = n12*wi.xy;
    wt.z  = ct2;
@@ -143,7 +143,7 @@ void Fresnel(in  vec3 wi, in  float n1, in  float n2, in float k2,
 
    float st1 = (1.0 - ct1*ct1);
    float n12 = n1/n2;
-   float st2 = sqr(n12)*st1;     
+   float st2 = sqr(n12)*st1;
    float ct2 = sqrt(1.0 - st2);
    wt.xy = n12*wi.xy;
    wt.z  = ct2;
@@ -166,7 +166,7 @@ void Fresnel(in  vec3  wi, in  vec3  m,
 
    float st1 = (1.0 - ct1*ct1);
    float n12 = n1/n2;
-   float st2 = sqr(n12)*st1;     
+   float st2 = sqr(n12)*st1;
    float ct2 = sqrt(1.0 - st2);
    wt  = n12*wi;
    wt += (ct2 - n12*ct1)*m;
@@ -188,7 +188,7 @@ void SamplingUniformHemisphere(in vec2 uv, out vec3 w, out float pdf) {
     float phi  = 2.0 * PI * uv.x;
     float cost = uv.y;
     float sint = sqrt(max(0.0, 1.0 - cost * cost));
-    
+
     w   = vec3(sint * cos(phi), sint * sin(phi), cost);
     pdf = 1.0 / (2.0*PI);
 }
@@ -328,9 +328,41 @@ void GGX_Sample_VNDF(in vec3 wi, in float alpha, in vec2 uv,
 
   // 5. compute normal
   m   = normalize(vec3(-slope_x, -slope_y, 1.0));
-  pdf = 1.0; 
+  pdf = 1.0;
 }
 
+/* Importance the vNDF of the GGX microfacet normal distribution
+ *
+ * Code from Eric Heitz: http://jcgt.org/published/0007/04/01/
+ *
+ *  + input Ve: view direction
+ *  + Input ax, ay: roughness parameters
+ *  + Input U1, U2: uniform random numbers
+ *  + Output Ne: normal sampled with PDF D_Ve(Ne) = G1(Ve) * max(0, dot(Ve, Ne)) * D(Ne) / Ve.z
+ */
+vec3 GGX_Sample_vNDF_aniso(in vec3  Ve,
+								   in float ax, in float ay,
+									in float U1, in float U2)
+{
+	// Section 3.2: transforming the view direction to the hemisphere configuration
+	vec3 Vh = normalize(vec3(ax * Ve.x, ay * Ve.y, Ve.z));
+	// Section 4.1: orthonormal basis (with special case if cross product is zero)
+	float lensq = Vh.x * Vh.x + Vh.y * Vh.y;
+	vec3 T1 = lensq > 0.0 ? vec3(-Vh.y, Vh.x, 0.0) * inversesqrt(lensq) : vec3(1,0,0);
+	vec3 T2 = cross(Vh, T1);
+	// Section 4.2: parameterization of the projected area
+	float r = sqrt(U1);
+	float phi = 2.0 * PI * U2;
+	float t1 = r * cos(phi);
+	float t2 = r * sin(phi);
+	float s = 0.5 * (1.0 + Vh.z);
+	t2 = (1.0 - s)*sqrt(1.0 - t1*t1) + s*t2;
+	// Section 4.3: reprojection onto hemisphere
+	vec3 Nh = t1*T1 + t2*T2 + sqrt(max(0.0, 1.0 - t1*t1 - t2*t2))*Vh;
+	// Section 3.4: transforming the normal back to the ellipsoid configuration
+	vec3 Ne = normalize(vec3(ax * Nh.x, ay * Nh.y, max(0.0, Nh.z)));
+	return Ne;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
@@ -347,7 +379,7 @@ float vMF_invA3(float y) {
 }
 
 float vMF_RoughnessToKm(float roughness) {
-  float sqr_roughness = sqr(roughness); 
+  float sqr_roughness = sqr(roughness);
   return 4.0 * ( 1.0 - sqr_roughness) / sqr_roughness;
 }
 
@@ -380,7 +412,7 @@ float vMF_BRDF(vec3 wi, vec3 wo, float km) {
   vec3  h = normalize(wi + wo);
   float NdotH = h.z;
   float NdotL = wi.z;
-  float NdotV = wo.z;  
+  float NdotV = wo.z;
   float D = vMF_D(h, vec3(0.0, 0.0, 1.0), km);
   float G = 1.0;//vMF_G(wi, wo, h, vec3(0.0, 0.0, 1.0), km);
   return (D*G) / abs(4.0*NdotL*NdotV);
@@ -394,9 +426,9 @@ float vMF_BRDF(vec3 wi, vec3 wo, float km) {
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-void Lambert_Sample(in vec3 wi, in vec3 n, in vec2 uv, out vec3 wo, out float pdf) {  
+void Lambert_Sample(in vec3 wi, in vec3 n, in vec2 uv, out vec3 wo, out float pdf) {
   // Generate a random sample on the hemisphere
-  vec3 tmp;  
+  vec3 tmp;
   SamplingUniformHemisphere(uv, tmp, pdf);
 
   // Use the local frame spawned by 'n' to provide the correct direction

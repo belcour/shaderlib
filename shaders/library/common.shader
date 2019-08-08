@@ -79,6 +79,6 @@ int imod(int n, int N) {
 //     return 0.5 * (1.0 + exp(- 2.0 * x)) / exp(- x);
 // }
 
-// float coth(float x) {
-//     return (1.0 - exp(- 2.0 * x)) / (1.0 + exp(- 2.0 * x));
-// }
+float coth(float x) {
+    return (1.0 - exp(- 2.0 * x)) / (1.0 + exp(- 2.0 * x));
+}
