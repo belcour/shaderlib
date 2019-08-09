@@ -12,10 +12,15 @@
 
 /* 2D -> 1D Pseudo-random noise from [-1, 1]^2 to [-1, 1]
  */
-float pseudorandom(in vec2 coordinate, in float seed) {
+float Noise_2D_to_1D(in vec2 coordinate, in float seed) {
     return fract(sin(dot(coordinate*seed, vec2(12.9898, 78.233)))*43758.5453);
 }
 
+/* 2D -> 2D noise
+ */
+vec2 Noise_2D_to_2D(in vec2 p) {
+	return fract(sin(vec2(dot(p, vec2(127.1,311.7)), dot(p,vec2(269.5,183.3))))*43758.5453);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
