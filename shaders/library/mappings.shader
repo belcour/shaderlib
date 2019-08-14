@@ -19,6 +19,16 @@ vec2 Sphere_to_LatLong(vec3 w) {
 }
 
 
+/* Blend a dual Paraboloid map where to textures are defined usign
+ * the forward and backward mapping respectively. The lookup of
+ * both textures are scaled with respect to the dot product with
+ * the direction of least distortion.
+ */
+vec3 Fetch_LatLong(in vec3 direction, in sampler2D latlong) {
+	vec2 uv = Sphere_to_LatLong(direction);
+	return texture(latlong, uv).xyz;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
