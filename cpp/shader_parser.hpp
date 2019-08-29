@@ -4,7 +4,6 @@
 #include <fstream>
 #include <streambuf>
 #include <regex>
-#include <iostream>
 
 namespace ShaderLib {
 
