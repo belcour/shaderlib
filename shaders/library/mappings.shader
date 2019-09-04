@@ -66,8 +66,8 @@ vec3 Paraboloid_ForwardZ_to_Sphere(in vec2 uv) {
 	}
 	
 	vec3 m = vec3(0,0,1);
-	vec3 n = vec3(uv.x, uv.y, sqrt(1.0 - l*l));
-	return reflect(-m, n);
+	vec3 n = vec3(uv.x, uv.y, -sqrt(1.0 - l*l));
+	return reflect(m, n);
 }
 
 
@@ -101,8 +101,8 @@ vec3 Paraboloid_BackwardZ_to_Sphere(in vec2 uv) {
 	}
 
 	vec3 m = vec3(0,0,-1);
-	vec3 n = vec3(uv.x, uv.y, -sqrt(1.0 - l*l));
-	return reflect(-m, n);
+	vec3 n = vec3(uv.x, uv.y, sqrt(1.0 - l*l));
+	return reflect(m, n);
 }
 
 /* Blend a dual Paraboloid map where to textures are defined usign
