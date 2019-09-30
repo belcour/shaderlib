@@ -117,10 +117,14 @@ vec3 Fetch_Dual_ParaboloidMap(in vec3 direction, in sampler2D paraboloidForward,
     // Accumulate the forward direction
     uv = Sphere_to_Paraboloid_ForwardZ(direction);
     vIBL += (0.5*direction.z + 0.5)*texture(paraboloidForward, uv).rgb;
+    // vec4 vForward = texture(paraboloidForward, uv);
+    // vIBL += vForward.rgb / vForward.a;
 
     // Accumulate the backward direction
     uv = Sphere_to_Paraboloid_BackwardZ(direction);
     vIBL += (0.5 - 0.5*direction.z)*texture(paraboloidBackward, uv).rgb;
+    // vec4 vBackward = texture(paraboloidBackward, uv);
+    // vIBL += vBackward.rgb / vBackward.a;
 
     return vIBL;
 }
@@ -135,10 +139,14 @@ vec3 Fetch_Dual_ParaboloidMapLod(in vec3 direction,
     // Accumulate the forward direction
     uv = Sphere_to_Paraboloid_ForwardZ(direction);
     vIBL += (0.5*direction.z + 0.5)*textureLod(paraboloidForward, uv, lod).rgb;
+    // vec4 vForward = textureLod(paraboloidForward, uv, lod);
+    // vIBL += vForward.rgb / vForward.a;
 
     // Accumulate the backward direction
     uv = Sphere_to_Paraboloid_BackwardZ(direction);
     vIBL += (0.5 - 0.5*direction.z)*textureLod(paraboloidBackward, uv, lod).rgb;
+    // vec4 vBackward = textureLod(paraboloidBackward, uv, lod);
+    // vIBL += vBackward.rgb / vBackward.a;
 
     return vIBL;
 }
