@@ -83,7 +83,8 @@
         var result;
         var fill;
         while((result = re.exec(buffer)) != null) {
-            prefix = '\n#line 1\n';
+            //prefix = '\n#line 1\n';
+            prefix = '\n';
             fill   = _inlineDict[result[0]];
             if(fill == undefined) {
                 alert('Aie');

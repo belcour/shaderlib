@@ -4,10 +4,14 @@
 #include <fstream>
 #include <streambuf>
 #include <regex>
+#include <list>
+#include <vector>
+#include <array>
 
 namespace ShaderLib {
 
-   using ShaderText = std::vector<std::string>;
+   using ShaderText    = std::vector<std::string>;
+   using ShaderDefines = std::vector<std::array<std::string, 2>>;
 
    /* A ShaderParser enables to load shaders and to look for include files or
     * specify defines during loading.
@@ -37,6 +41,13 @@ namespace ShaderLib {
             shaders.push_back(shader);
          }
          return shaders;
+      }
+
+      /* Set a list of defines to be added to the loaded shaders
+       */
+      void setDefines(const ShaderDefines& defines)
+      {
+         _defines = defines;
       }
 
       private:
@@ -78,9 +89,18 @@ namespace ShaderLib {
        */
       std::string processIncludes(const ShaderText& buffer)
       {
-         std::string shader;
+         std::string shader = buffer[0] + "\n"; // First line must be `#version [..]`
+
+         // Append the defines
+         for(auto define : _defines) {
+            shader += "#define " + define[0] + " " + define[1];
+            shader += "\n";
+         }
+
+         // Load includes if necessary
          const std::regex _inlineRegEx("^[ \t]*#include [\"]([^#\"<>\n \t]+)[\"]", std::regex::extended);
-         for(auto line : buffer) {
+         for(int k=1; k<buffer.size(); ++k) {
+            auto line = buffer[k];
             std::smatch match;
             auto has_match = std::regex_match(line, match, _inlineRegEx);
             if(has_match) {
@@ -113,7 +133,7 @@ namespace ShaderLib {
        * to finally replace the strings into the shaders.
        */
       std::map<std::string, std::string> _everyLoads;
-
+      ShaderDefines _defines;
       std::string _baseUrl;
    };
 

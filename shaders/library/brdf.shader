@@ -28,7 +28,7 @@ void FresnelDielectric(in float ct1, in float n1, in float n2,
 
     float ct2 = sqrt(1.0 - sqr(nr) * st1);
     vec2 r = vec2((n2*ct1 - n1*ct2) / (n2*ct1 + n1*ct2),
-        	     (n1*ct1 - n2*ct2) / (n1*ct1 + n2*ct2));
+                (n1*ct1 - n2*ct2) / (n1*ct1 + n2*ct2));
     phi.x = (r.x < 0.0) ? PI : 0.0;
     phi.y = (r.y < 0.0) ? PI : 0.0;
     R = sqr(r);
@@ -41,22 +41,22 @@ void FresnelDielectric(in float ct1, in float n1, in float n2,
 void FresnelConductor(in float ct1, in float n1, in float n2, in float k,
                        out vec2 R, out vec2 phi) {
 
-	if (k<=0.0) {
-		FresnelDielectric(ct1, n1, n2, R, phi);
+   if (k<=0.0) {
+      FresnelDielectric(ct1, n1, n2, R, phi);
     return;
-	}
+   }
 
-	float A = sqr(n2) * (1.0-sqr(k)) - sqr(n1) * (1.0-sqr(ct1));
-	float B = sqrt( sqr(A) + sqr(2.0*sqr(n2)*k) );
-	float U = sqrt((A+B)/2.0);
-	float V = sqrt((B-A)/2.0);
+   float A = sqr(n2) * (1.0-sqr(k)) - sqr(n1) * (1.0-sqr(ct1));
+   float B = sqrt( sqr(A) + sqr(2.0*sqr(n2)*k) );
+   float U = sqrt((A+B)/2.0);
+   float V = sqrt((B-A)/2.0);
 
-	R.y = (sqr(n1*ct1 - U) + sqr(V)) / (sqr(n1*ct1 + U) + sqr(V));
-	phi.y = atan( 2.0*n1 * V*ct1, sqr(U)+sqr(V)-sqr(n1*ct1) ) + PI;
+   R.y = (sqr(n1*ct1 - U) + sqr(V)) / (sqr(n1*ct1 + U) + sqr(V));
+   phi.y = atan( 2.0*n1 * V*ct1, sqr(U)+sqr(V)-sqr(n1*ct1) ) + PI;
 
-	R.x = ( sqr(sqr(n2)*(1.0-sqr(k))*ct1 - n1*U) + sqr(2.0*sqr(n2)*k*ct1 - n1*V) )
-			/ ( sqr(sqr(n2)*(1.0-sqr(k))*ct1 + n1*U) + sqr(2.0*sqr(n2)*k*ct1 + n1*V) );
-	phi.x = atan( 2.0*n1*sqr(n2)*ct1 * (2.0*k*U - (1.0-sqr(k))*V), sqr(sqr(n2)*(1.0+sqr(k))*ct1) - sqr(n1)*(sqr(U)+sqr(V)) );
+   R.x = ( sqr(sqr(n2)*(1.0-sqr(k))*ct1 - n1*U) + sqr(2.0*sqr(n2)*k*ct1 - n1*V) )
+         / ( sqr(sqr(n2)*(1.0-sqr(k))*ct1 + n1*U) + sqr(2.0*sqr(n2)*k*ct1 + n1*V) );
+   phi.x = atan( 2.0*n1*sqr(n2)*ct1 * (2.0*k*U - (1.0-sqr(k))*V), sqr(sqr(n2)*(1.0+sqr(k))*ct1) - sqr(n1)*(sqr(U)+sqr(V)) );
 }
 
 /* Return the unpolarized version of the complete dielectric Fresnel equations
@@ -254,81 +254,30 @@ float GGX_T(vec3 wi, vec3 wo, vec3 n, float n12, float R, float a) {
     return fact * ((1.0 - R) * GGX_D(NdotH, a)*GGX_G(NdotL, NdotV, a)) / sqr(n12*HdotL + HdotV);
 }
 
-/* Importance sampling the GGX distribution.
- * {TODO}
- * {From: Jonathan Dupuy's code}
+/* Anisotropic Lambda function for GGX microfacet distribution.
+ * 
+ * Heitz, Understanding the Masking-Shadowing Functionin Microfacet-Based BRDFs
+ * Equation 86, page 86
  */
-void GGX_Sample_VNDF(in vec3 wi, in float alpha, in vec2 uv,
-                     out vec3 m, out float pdf) {
+float GGX_Lambda(vec3 w, vec2 alpha) {
+   float inv_a2 = sqr(alpha.x*w.x/w.z) + sqr(alpha.y*w.y/w.z);
+   return 0.5*sqrt(1.0 + inv_a2) - 0.5;
+}
 
-  // 1. stretch wi
-  wi = vec3(alpha, alpha, 1.0)*wi;
+/* Smith GGX geometric functions
+ */
+float GGX_G1(vec3 w, vec3 m, vec2 alpha) {
+   if(dot(w,m) > 0.0) {
+      return 1.0 / (1.0 + GGX_Lambda(w, alpha));
+   } else {
+      return 0.0;
+   }
+}
 
-  // normalize
-  wi = normalize(wi);
-
-  float cos_theta = wi.z;
-  float sin_theta = sqrt(1.0 - cos_theta*cos_theta);
-
-  // 2. simulate P22_{wi}(x_slope, y_slope, 1, 1)
-  float slope_x, slope_y;
-
-  vec2 cos_sin_phi;
-
-  // special case (normal incidence)
-  if (cos_theta >= 0.9999999)
-  {
-    float r = sqrt(uv.x/(1.0 - uv.x));
-    float p = 6.28318530718*uv.y;
-    slope_x = r*cos(p);
-    slope_y = r*sin(p);
-    cos_sin_phi = vec2(1.0, 0.0);
-  }
-  else
-  {
-    // sample slope_x
-    float G1 = 2.0*cos_theta/(cos_theta + 1.0);
-    float A = 2.0*uv.x/G1 - 1.0;
-    float tmp = 1.0/(A*A - 1.0);
-    float B = sin_theta/cos_theta;
-    float D = sqrt(B*B*tmp*tmp - (A*A - B*B)*tmp);
-    float slope_x_1 = B*tmp - D;
-    float slope_x_2 = B*tmp + D;
-
-    slope_x = (A < 0.0 || slope_x_2 > 1.0/B) ? slope_x_1 : slope_x_2;
-
-    // sample slope_y
-    float S;
-    if (uv.y > 0.5)
-    {
-      S = 1.0;
-      uv.y = 2.0*(uv.y-0.5);
-    }
-    else
-    {
-      S = -1.0;
-      uv.y = 2.0*(0.5-uv.y);
-    }
-
-    float z = (uv.y*(uv.y*(uv.y*0.27385 - 0.73369) + 0.46341)) / (uv.y*(uv.y*(uv.y*0.093073 + 0.309420) - 1.000000) + 0.597999);
-
-    slope_y = S*z*sqrt(1.0 + slope_x*slope_x);
-
-    cos_sin_phi = normalize(wi.xy);
-  }
-
-  // 3. rotate
-  float tmp = cos_sin_phi.x*slope_x - cos_sin_phi.y*slope_y;
-  slope_y   = cos_sin_phi.y*slope_x + cos_sin_phi.x*slope_y;
-  slope_x   = tmp;
-
-  // 4. unstretch
-  slope_x = alpha*slope_x;
-  slope_y = alpha*slope_y;
-
-  // 5. compute normal
-  m   = normalize(vec3(-slope_x, -slope_y, 1.0));
-  pdf = 1.0;
+/* Smith GGX geometric functions
+ */
+float GGX_G2(vec3 wi, vec3 wo, vec3 m, vec2 alpha) {
+   return GGX_G1(wi, m, alpha)*GGX_G1(wo, m, alpha);
 }
 
 /* Importance the vNDF of the GGX microfacet normal distribution
@@ -341,27 +290,27 @@ void GGX_Sample_VNDF(in vec3 wi, in float alpha, in vec2 uv,
  *  + Output Ne: normal sampled with PDF D_Ve(Ne) = G1(Ve) * max(0, dot(Ve, Ne)) * D(Ne) / Ve.z
  */
 vec3 GGX_Sample_vNDF_aniso(in vec3  Ve,
-								   in float ax, in float ay,
-									in float U1, in float U2)
+                           in float ax, in float ay,
+                           in float U1, in float U2)
 {
-	// Section 3.2: transforming the view direction to the hemisphere configuration
-	vec3 Vh = normalize(vec3(ax * Ve.x, ay * Ve.y, Ve.z));
-	// Section 4.1: orthonormal basis (with special case if cross product is zero)
-	float lensq = Vh.x * Vh.x + Vh.y * Vh.y;
-	vec3 T1 = lensq > 0.0 ? vec3(-Vh.y, Vh.x, 0.0) * inversesqrt(lensq) : vec3(1,0,0);
-	vec3 T2 = cross(Vh, T1);
-	// Section 4.2: parameterization of the projected area
-	float r = sqrt(U1);
-	float phi = 2.0 * PI * U2;
-	float t1 = r * cos(phi);
-	float t2 = r * sin(phi);
-	float s = 0.5 * (1.0 + Vh.z);
-	t2 = (1.0 - s)*sqrt(1.0 - t1*t1) + s*t2;
-	// Section 4.3: reprojection onto hemisphere
-	vec3 Nh = t1*T1 + t2*T2 + sqrt(max(0.0, 1.0 - t1*t1 - t2*t2))*Vh;
-	// Section 3.4: transforming the normal back to the ellipsoid configuration
-	vec3 Ne = normalize(vec3(ax * Nh.x, ay * Nh.y, max(0.0, Nh.z)));
-	return Ne;
+   // Section 3.2: transforming the view direction to the hemisphere configuration
+   vec3 Vh = normalize(vec3(ax * Ve.x, ay * Ve.y, Ve.z));
+   // Section 4.1: orthonormal basis (with special case if cross product is zero)
+   float lensq = Vh.x*Vh.x + Vh.y*Vh.y;
+   vec3 T1 = lensq > 0.0 ? vec3(-Vh.y, Vh.x, 0.0) * inversesqrt(lensq) : vec3(1,0,0);
+   vec3 T2 = cross(Vh, T1);
+   // Section 4.2: parameterization of the projected area
+   float r = sqrt(U1);
+   float phi = 2.0 * PI * U2;
+   float t1 = r * cos(phi);
+   float t2 = r * sin(phi);
+   float s = 0.5 * (1.0 + Vh.z);
+   t2 = (1.0 - s)*sqrt(1.0 - t1*t1) + s*t2;
+   // Section 4.3: reprojection onto hemisphere
+   vec3 Nh = t1*T1 + t2*T2 + sqrt(max(0.0, 1.0 - t1*t1 - t2*t2))*Vh;
+   // Section 3.4: transforming the normal back to the ellipsoid configuration
+   vec3 Ne = normalize(vec3(ax * Nh.x, ay * Nh.y, max(0.0, Nh.z)));
+   return Ne;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -57,6 +57,13 @@ vec2 QMC_Additive_2D(int n) {
     return mod(vec2(0.5545497, 0.308517) * float(n), vec2(1.0, 1.0));
 }
 
+vec2 QMC_GoldenRatio(int n, vec2 scramble=vec2(0.5,0.5)) {
+    const float g = 1.32471795724474602596;
+    const float a1 = 1.0/g;
+    const float a2 = 1.0/(g*g);
+    return vec2( mod(scramble.x+a1*float(n), 1.0), mod(scramble.y+a2*float(n), 1.0) );
+}
+
 vec3 QMC_Additive_3D(vec3 alpha, int n) {
     return mod(alpha * float(n), vec3(1.0, 1.0, 1.0));
 }
