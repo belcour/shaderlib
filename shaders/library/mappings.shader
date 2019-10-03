@@ -1,6 +1,22 @@
 #ifndef MAPPING_SHADER
 #define MAPPING_SHADER
 
+
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+//                            Space conversion                               //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
+vec3 Local_to_Global(vec3 w, vec3 T, vec3 B, vec3 N) {
+    return w.x*T + w.y*B + w.z*N;
+}
+
+vec3 Global_to_Local(vec3 w, vec3 T, vec3 B, vec3 N) {
+    return vec3(dot(w,T), dot(w,B), dot(w,N));
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
 //                             LatLong Mapping                               //

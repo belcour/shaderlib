@@ -100,15 +100,16 @@ void ComputeBsdfLobes(in vec3 wi, in BsdfLayer[NUM_LAYERS] layers, out BsdfLobe[
 
 
     // Evaluate the reflectance and transmittance of the bottom layer
+    vec3 r23, t23;
     if(layers[1].n > 0.0) {
-        r12 = FresnelUnpolarized(wt.z, layers[0].n, layers[1].n)*vec3(1.0);
-        t12 = vec3(1.0, 1.0, 1.0) - r12;
+        r23 = FresnelUnpolarized(wt.z, layers[0].n, layers[1].n)*vec3(1.0);
+        t23 = vec3(1.0, 1.0, 1.0) - r23;
     } else {
-        r12 = FresnelSchlick(wt.z, layers[1].k);
-        t12 = vec3(0.0, 0.0, 0.0);
+        r23 = FresnelSchlick(wt.z, layers[1].k);
+        t23 = vec3(0.0, 0.0, 0.0);
     }
 
     lobes[1].wi = wi;
-    lobes[1].R  = tij * r12 * tij;
+    lobes[1].R  = tij * (r23 / (vec3(1.0) - r12*r23)) * tij;
     lobes[1].a  = max(layers[1].a, layers[0].a);
 }
