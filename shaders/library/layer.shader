@@ -17,11 +17,18 @@
  * a layer has a complex bottom IOR (k2 > 0), it ends the layered structure.
  */
 struct BsdfLayer {
-  float n;    // Index of refraction
-  vec3  k;    // Imaginary part of the second IRO
-  float a;    // Roughness of the layer
+    float n;    // Index of refraction
+    vec3  k;    // Imaginary part of the second IRO
+    vec2  a;    // Roughness of the layer
 };
 
+/* BSDF lobe
+ */
+struct BsdfLobe {
+    vec3 wi;
+    vec3 R;
+    vec2 a;
+};
 
 /* The layer structure has to be created using 'layers' uniform variable. You
  * have to set 'layers[id].n1' in the main HTML file.
@@ -46,7 +53,62 @@ BsdfLayer GetLayer(int start) {
 
     BsdfLayer layer;
     layer.n = 1.0;
-    layer.k = vec3(0.0, 0.0, 0.0);
-    layer.a = 0.0;
+    layer.k = vec3(0, 0, 0);
+    layer.a = vec2(0, 0);
     return layer;
+}
+
+
+/* Compute the BSDF lobes from a set of layers and an input
+ * direction
+ */
+void ComputeBsdfLobes(in vec3 wi, in BsdfLayer[NUM_LAYERS] layers, out BsdfLobe[NUM_LAYERS] lobes)
+{
+    vec3 rij = vec3(0.0, 0.0, 0.0);
+    vec3 tij = vec3(1.0, 1.0, 1.0);
+
+    // Evaluate the reflectance and transmittance of the top layer
+    vec3 r12, t12;
+    if(layers[0].n > 0.0) {
+        r12 = FresnelUnpolarized(wi.z, 1.0, layers[0].n)*vec3(1.0);
+        t12 = vec3(1.0, 1.0, 1.0) - r12;
+    } else {
+        r12 = FresnelSchlick(wi.z, layers[0].k);
+        t12 = vec3(0.0, 0.0, 0.0);
+    }
+
+    // Write the BSDF lobe for the first layer
+    // Early exit if the layer is a conductor (no transmittance)
+    lobes[0].wi = wi;
+    lobes[0].R  = r12;
+    lobes[0].a  = layers[0].a;
+    if(layers[0].n <= 0.0) {
+        lobes[1].wi = wi;
+        lobes[1].R  = vec3(0);
+        lobes[1].a  = layers[1].a;
+        return;
+    }
+
+    // Update the global transmittance and reflectance
+    tij *= t12;
+    rij += r12;
+
+    // Snell laws for the central ray
+    vec3 wt;
+    wt.xy = (1.0/layers[0].n)*wi.xy;
+    wt.z  = sqrt(1.0 - (wi.x*wi.x + wi.y*wi.y));
+
+
+    // Evaluate the reflectance and transmittance of the bottom layer
+    if(layers[1].n > 0.0) {
+        r12 = FresnelUnpolarized(wt.z, layers[0].n, layers[1].n)*vec3(1.0);
+        t12 = vec3(1.0, 1.0, 1.0) - r12;
+    } else {
+        r12 = FresnelSchlick(wt.z, layers[1].k);
+        t12 = vec3(0.0, 0.0, 0.0);
+    }
+
+    lobes[1].wi = wi;
+    lobes[1].R  = tij * r12 * tij;
+    lobes[1].a  = max(layers[1].a, layers[0].a);
 }

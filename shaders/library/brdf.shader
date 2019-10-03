@@ -68,6 +68,12 @@ float FresnelUnpolarized(in float ct1, in float n1, in float n2) {
   return 0.5*(R.x+R.y);
 }
 
+float FresnelUnpolarized(in float ct1, in float n12) {
+  vec2 R, phi;
+  FresnelDielectric(ct1, 1.0, n12, R, phi);
+  return 0.5*(R.x+R.y);
+}
+
 /* Return the unpolarized version of the complete dielectric Fresnel equations
  * from `FresnelConductor` without accounting for wave phase shift.
  */
