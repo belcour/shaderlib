@@ -217,11 +217,23 @@ float GGX_D(float NdotH, float a) {
     return a2 / (PI * sqr( sqr(NdotH) * (a2 - 1.0) + 1.0));
 }
 
+float GGX_D(vec3 H, vec2 a) {
+    if(H.z < 0.0) {
+        return 0.0;
+    }
+    return 1.0 / (PI * a.x*a.y * sqr( sqr(H.x/a.x) + sqr(H.y/a.y) + sqr(H.z) ));
+}
+
 /* Smith GGX geometric functions
  */
 float GGX_G1(float NdotV, float a) {
     float a2 = sqr(a);
     return 2.0/(1.0 + sqrt(1.0 + a2 * (1.0-sqr(NdotV)) / sqr(NdotV) ));
+}
+
+float GGX_G1(vec3 V, vec2 a) {
+    float A = -0.5 + 0.5*sqrt(1.0 + (sqr(a.x*V.x) + sqr(a.y*V.y)) / sqr(V.z));
+    return 1.0 / (1.0 + A);
 }
 
 /* Smith uncorrelated shadowing/masking function.

@@ -58,7 +58,7 @@ BsdfLayer GetLayer(int start) {
     return layer;
 }
 
-
+#ifdef OLD
 /* Compute the BSDF lobes from a set of layers and an input
  * direction
  */
@@ -113,3 +113,4 @@ void ComputeBsdfLobes(in vec3 wi, in BsdfLayer[NUM_LAYERS] layers, out BsdfLobe[
     lobes[1].R  = tij * (r23 / (vec3(1.0) - r12*r23)) * tij;
     lobes[1].a  = max(layers[1].a, layers[0].a);
 }
+#endif
