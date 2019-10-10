@@ -8,7 +8,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
-//                             Layer Structure                               //
+//                           Layered Structure                               //
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -36,8 +36,6 @@ struct BsdfLobe {
 #define NUM_LAYERS 2
 uniform BsdfLayer u_BsdfLayers[NUM_LAYERS];
 
-
-
 /* Helper function to select a given layer by index 'start' since it is
  * not possible to use a non constant index to layers[index].
  *
@@ -56,6 +54,25 @@ BsdfLayer GetLayer(int start) {
     layer.k = vec3(0, 0, 0);
     layer.a = vec2(0, 0);
     return layer;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+//                      Convert Roughness to Variance                        //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
+
+float Layered_Roughness2Variance_Belcour2018(float alpha) {
+   float a2 = pow(alpha, 1.1);
+   return a2 / (1.0 - a2);
+}
+
+float Layered_Variance2Roughness_Belcour2018(float var) {
+   float sig = var / (1.0+var);
+   return pow(sig, 1.0/1.1);
 }
 
 #ifdef OLD
